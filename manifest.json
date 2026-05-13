@@ -1,0 +1,16 @@
+{
+  "name": "Lista Negra · Art. 69-B CFF",
+  "short_name": "Lista Negra",
+  "description": "Consulta gratuita del listado de contribuyentes 69-B del SAT México",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#2c1005",
+  "theme_color": "#2c1005",
+  "lang": "es",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ],
+  "categories": ["finance", "business", "utilities"]
+}
