@@ -267,17 +267,18 @@ async function ensureDB(el){
   catch{if(el)el.innerHTML='<div class="alert alert-bad"><span class="alert-icon">&#10060;</span><div class="alert-text">Error al cargar la base de datos.</div></div>';return false;}
 }
 
-// ── CONTADOR GLOBAL (countapi.xyz) ──
+// ── CONTADOR GLOBAL (Cloudflare KV Worker) ──
+const CONTADOR_URL="https://in-contador.j-albavaladez.workers.dev/contador";
 async function loadCnt(){
   try{
-    const r=await fetch("https://api.countapi.xyz/get/listanegra-distrito-digital/consultas");
+    const r=await fetch(CONTADOR_URL);
     const d=await r.json();
     return d.value||0;
   }catch{return 0;}
 }
 async function bumpCnt(){
   try{
-    const r=await fetch("https://api.countapi.xyz/hit/listanegra-distrito-digital/consultas");
+    const r=await fetch(CONTADOR_URL,{method:"POST"});
     const d=await r.json();
     document.getElementById("counter").textContent=(d.value||0).toLocaleString("es-MX");
   }catch{}
