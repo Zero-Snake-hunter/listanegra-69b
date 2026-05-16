@@ -89,6 +89,8 @@ body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;min-height:100vh;
 .lbtn-sat:hover{background:rgba(200,16,46,.28)}
 .lbtn-dof{background:rgba(0,48,130,.18);border-color:rgba(55,138,221,.28);color:#7ac4ff}
 .lbtn-dof:hover{background:rgba(0,48,130,.35)}
+.lbtn-anexo{background:rgba(255,140,0,.12);border-color:rgba(255,140,0,.3);color:#ffc060}
+.lbtn-anexo:hover{background:rgba(255,140,0,.28)}
 .no-stage{font-size:10px;color:rgba(160,130,80,.28);font-style:italic;padding:2px 0}
 .stg-presuncion .stage-head{background:rgba(239,159,39,.08)}.stg-presuncion .sdot{background:#f5c46a}.stg-presuncion .slabel{color:#f5c46a}
 .stg-desvirtuaron .stage-head{background:rgba(29,158,117,.08)}.stg-desvirtuaron .sdot{background:#52c99a}.stg-desvirtuaron .slabel{color:#52c99a}
@@ -243,12 +245,20 @@ function extractNum(oficio){
   var m=oficio.match(/-(\d{4,6})(?:\s|$)/);
   return m?m[1]:null;
 }
+// Cache de respuestas /oficio/{num} para no repetir fetch
+var _oficioCache={};
+async function _fetchOficio(num){
+  if(_oficioCache[num]) return _oficioCache[num];
+  var r=await fetch(LISTANEGRA_API+"/oficio/"+num);
+  var d=await r.json();
+  _oficioCache[num]=d;
+  return d;
+}
 async function abrirOficio(num,btn){
   var ldate=btn?btn.getAttribute("data-date"):"";
   if(btn){btn.innerHTML="&#9203; Buscando...";btn.disabled=true;}
   try{
-    var r=await fetch(LISTANEGRA_API+"/oficio/"+num);
-    var d=await r.json();
+    var d=await _fetchOficio(num);
     if(btn){btn.disabled=false;btn.innerHTML="&#128196; Oficio PDF<span class='ldate'>"+ldate+"</span>";}
     window.open(d.url,"_blank","noopener");
   }catch(e){
@@ -256,18 +266,35 @@ async function abrirOficio(num,btn){
     window.open("http://omawww.sat.gob.mx/informacionfiscal/Documents/O_"+num+".pdf","_blank","noopener");
   }
 }
+async function abrirAnexo(num,btn){
+  var ldate=btn?btn.getAttribute("data-date"):"";
+  if(btn){btn.innerHTML="&#9203; Buscando...";btn.disabled=true;}
+  try{
+    var d=await _fetchOficio(num);
+    if(btn){btn.disabled=false;btn.innerHTML="&#128203; Anexo PDF<span class='ldate'>"+ldate+"</span>";}
+    window.open(d.anexo_url||d.url,"_blank","noopener");
+  }catch(e){
+    if(btn){btn.disabled=false;btn.innerHTML="&#128203; Anexo PDF<span class='ldate'>"+ldate+"</span>";}
+    window.open(SAT_PAGE,"_blank","noopener");
+  }
+}
 
 function stageBlock(cls,emoji,label,oficio,pubSAT,pubDOF){
   var hasAny=!!(oficio||pubSAT||pubDOF);
   var dofLink=dofUrl(pubDOF);
-  var satBtn="";
+  var satBtn="",anexoBtn="";
   if(pubSAT){
     var num=extractNum(oficio);
     if(num){
-      satBtn='<button class="lbtn lbtn-sat" data-date="'+pubSAT+'" onclick="abrirOficio(\''+num+'\',this)">&#128196; Oficio PDF<span class="ldate">'+pubSAT+'</span></button>';
+      satBtn='<button class="lbtn lbtn-sat" data-date="'+pubSAT+'" onclick="abrirOficio(\''+num+\'\',this)">&#128196; Oficio PDF<span class="ldate">'+pubSAT+'</span></button>';
+      anexoBtn='<button class="lbtn lbtn-anexo" data-date="'+pubSAT+'" onclick="abrirAnexo(\''+num+\'\',this)">&#128203; Anexo PDF<span class="ldate">'+pubSAT+'</span></button>';
     }else{
       satBtn='<a class="lbtn lbtn-sat" href="'+SAT_PAGE+'" target="_blank" rel="noopener">&#128308; SAT<span class="ldate">'+pubSAT+'</span></a>';
     }
+  }
+  var dofBtn=dofLink?'<a class="lbtn lbtn-dof" href="'+dofLink+'" target="_blank" rel="noopener">&#128240; DOF<span class="ldate">'+pubDOF+'</span></a>':"";
+  return'<div class="stage-card '+cls+(hasAny?" active-stage":"")+'"><div class="stage-head"><div class="sdot"></div><span class="slabel">'+emoji+' '+label+'</span></div><div class="stage-body">'+(oficio?'<div class="oficio">'+oficio+'</div>':'')+'<div class="links-col">'+satBtn+anexoBtn+dofBtn+'</div>'+(hasAny?'':\'<div class="no-stage">Sin registro en esta etapa</div>')+'</div></div>';
+}
   }
   var dofBtn=dofLink?'<a class="lbtn lbtn-dof" href="'+dofLink+'" target="_blank" rel="noopener">&#128240; DOF<span class="ldate">'+pubDOF+'</span></a>':"";
   return'<div class="stage-card '+cls+(hasAny?" active-stage":"")+'"><div class="stage-head"><div class="sdot"></div><span class="slabel">'+emoji+' '+label+'</span></div><div class="stage-body">'+(oficio?'<div class="oficio">'+oficio+'</div>':'')+(hasAny?'<div class="links-col">'+satBtn+dofBtn+'</div>':'<div class="no-stage">Sin registro en esta etapa</div>')+'</div></div>';
@@ -363,4 +390,3 @@ fetch("https://listanegra-api-production.up.railway.app/status").then(function(r
 </script>
 </body>
 </html>
-
