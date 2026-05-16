@@ -245,7 +245,7 @@ function extractNum(oficio){
   var m=oficio.match(/-(\d{4,6})(?:\s|$)/);
   return m?m[1]:null;
 }
-// Cache de respuestas /oficio/{num} para no repetir fetch
+// Cache de respuestas /oficio/{num}
 var _oficioCache={};
 async function _fetchOficio(num){
   if(_oficioCache[num]) return _oficioCache[num];
@@ -278,7 +278,6 @@ async function abrirAnexo(num,btn){
     window.open(SAT_PAGE,"_blank","noopener");
   }
 }
-
 function stageBlock(cls,emoji,label,oficio,pubSAT,pubDOF){
   var hasAny=!!(oficio||pubSAT||pubDOF);
   var dofLink=dofUrl(pubDOF);
@@ -286,18 +285,14 @@ function stageBlock(cls,emoji,label,oficio,pubSAT,pubDOF){
   if(pubSAT){
     var num=extractNum(oficio);
     if(num){
-      satBtn='<button class="lbtn lbtn-sat" data-date="'+pubSAT+'" onclick="abrirOficio(\''+num+\'\',this)">&#128196; Oficio PDF<span class="ldate">'+pubSAT+'</span></button>';
-      anexoBtn='<button class="lbtn lbtn-anexo" data-date="'+pubSAT+'" onclick="abrirAnexo(\''+num+\'\',this)">&#128203; Anexo PDF<span class="ldate">'+pubSAT+'</span></button>';
+      satBtn='<button class="lbtn lbtn-sat" data-date="'+pubSAT+'" onclick="abrirOficio(\''+num+'\',this)">&#128196; Oficio PDF<span class="ldate">'+pubSAT+'</span></button>';
+      anexoBtn='<button class="lbtn lbtn-anexo" data-date="'+pubSAT+'" onclick="abrirAnexo(\''+num+'\',this)">&#128203; Anexo PDF<span class="ldate">'+pubSAT+'</span></button>';
     }else{
       satBtn='<a class="lbtn lbtn-sat" href="'+SAT_PAGE+'" target="_blank" rel="noopener">&#128308; SAT<span class="ldate">'+pubSAT+'</span></a>';
     }
   }
   var dofBtn=dofLink?'<a class="lbtn lbtn-dof" href="'+dofLink+'" target="_blank" rel="noopener">&#128240; DOF<span class="ldate">'+pubDOF+'</span></a>':"";
-  return'<div class="stage-card '+cls+(hasAny?" active-stage":"")+'"><div class="stage-head"><div class="sdot"></div><span class="slabel">'+emoji+' '+label+'</span></div><div class="stage-body">'+(oficio?'<div class="oficio">'+oficio+'</div>':'')+'<div class="links-col">'+satBtn+anexoBtn+dofBtn+'</div>'+(hasAny?'':\'<div class="no-stage">Sin registro en esta etapa</div>')+'</div></div>';
-}
-  }
-  var dofBtn=dofLink?'<a class="lbtn lbtn-dof" href="'+dofLink+'" target="_blank" rel="noopener">&#128240; DOF<span class="ldate">'+pubDOF+'</span></a>':"";
-  return'<div class="stage-card '+cls+(hasAny?" active-stage":"")+'"><div class="stage-head"><div class="sdot"></div><span class="slabel">'+emoji+' '+label+'</span></div><div class="stage-body">'+(oficio?'<div class="oficio">'+oficio+'</div>':'')+(hasAny?'<div class="links-col">'+satBtn+dofBtn+'</div>':'<div class="no-stage">Sin registro en esta etapa</div>')+'</div></div>';
+  return'<div class="stage-card '+cls+(hasAny?" active-stage":"")+'">'+'<div class="stage-head"><div class="sdot"></div><span class="slabel">'+emoji+' '+label+'</span></div>'+'<div class="stage-body">'+(oficio?'<div class="oficio">'+oficio+'</div>':'')+(hasAny?'<div class="links-col">'+satBtn+anexoBtn+dofBtn+'</div>':'<div class="no-stage">Sin registro en esta etapa</div>')+'</div></div>';
 }
 function renderResult(rfc,d){
   return'<div class="contrib-card"><div class="contrib-top"><div class="rfc-tag">'+rfc+'</div><div class="contrib-info"><div class="contrib-nombre">'+(d[0]||"&mdash;")+'</div><span class="sit-badge '+sitClass(d[1])+'">'+(d[1]||"&mdash;")+'</span></div></div></div><div class="stages-grid">'+
